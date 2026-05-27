@@ -3,33 +3,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-//this func is related to dfsRec for getting decreasing finishing order func
-void dfsRec(vector<vector<int>> &graph,stack<int> &st,int s,vector<bool> &visited){
-    visited[s]=true;
-    for(auto i : graph[s]){
-        if(!visited[i]){
-            dfsRec(graph,st,i,visited);
-        }
-    }
-    st.push(s);
-}
-
-//this fun is used to get decreasing order finishing time of vertices
-vector<int> getMyOrder(vector<vector<int>> &graph){
-    vector<int> order;
-    stack<int> st;
-    vector<bool> visited(graph.size(),false);
-    for(int i=0 ; i < graph.size() ; i++){
-        if(!visited[i]){
-            dfsRec(graph,st,i,visited);
-        }
-    }
-    while(!st.empty()){
-        order.push_back(st.top());
-        st.pop();
-    }
-    return order;
-}
 
 //this func is to reverse the edges of graph and give a new graph
 vector<vector<int>> reverseGraph(vector<vector<int>> &graph){
