@@ -4,15 +4,7 @@
 using namespace std;
 
 //this func is related to dfsRec for getting decreasing finishing order func
-void dfsRec(vector<vector<int>> &graph,stack<int> &st,int s,vector<bool> &visited){
-    visited[s]=true;
-    for(auto i : graph[s]){
-        if(!visited[i]){
-            dfsRec(graph,st,i,visited);
-        }
-    }
-    st.push(s);
-}
+
 
 //this fun is used to get decreasing order finishing time of vertices
 vector<int> getMyOrder(vector<vector<int>> &graph){
