@@ -1,0 +1,8 @@
+if not str(args.max_fake_per_method).lower() in ("none", "null", ""):
+        max_fake_per_method = int(args.max_fake_per_method)
+    else:
+        max_fake_per_method = 10000  # Increased from None to 10000 for better training data
+
+    # If max_fake_per_method would exceed real count, cap it
+    if max_fake_per_method is not None:
+        max_fake_per_method = min(max_fake_per_method, n_real)

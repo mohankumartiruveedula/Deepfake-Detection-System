@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Deepfake Detector UI</title>
+  
+  <!-- React & Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-color: #0b0d17;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --primary: #6d28d9;
+      --primary-hover: #5b21b6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-glow: rgba(109, 40, 217, 0.5);
+      --fake-color: #ef4444;
+      --real-color: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(109, 40, 217, 0.1), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.1), transparent 25%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 800px;
+      padding: 2rem;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #a78bfa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--glass-border);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: rgba(0,0,0,0.2);
+    }
+
+    .upload-zone:hover, .upload-zone.drag-active {
+      border-color: var(--primary);
+      background: rgba(109, 40, 217, 0.1);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .file-input { display: none; }
+
+    .loader-container {
+      display: flex; flex-direction: column; align-items: center; gap: 1.5rem; padding: 2rem 0;
+    }
+    
+    .spinner {
+      width: 50px; height: 50px; border: 4px solid var(--glass-border);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pulsing-text {
+      animation: pulse 1.5s infinite; color: var(--text-muted); font-weight: 500;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    .results-view { text-align: center; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .preview-container { max-width: 300px; margin: 0 auto 2rem; border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); }
+    .preview-media { width: 100%; height: auto; display: block; }
+    
+    .verdict-box { padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; background: rgba(0,0,0,0.3); }
+    .verdict-box.real { border: 1px solid var(--real-color); box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
+    .verdict-box.fake { border: 1px solid var(--fake-color); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }
+    
+    .verdict-label { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: 2px; text-transform: uppercase;}
+    .real .verdict-label { color: var(--real-color); }
+    .fake .verdict-label { color: var(--fake-color); }
+    
+    .confidence-bar-bg { width: 100%; height: 8px; background: var(--glass-border); border-radius: 4px; margin-top: 1rem; overflow: hidden; }
+    .confidence-bar-fill { height: 100%; border-radius: 4px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+    .real .confidence-bar-fill { background: var(--real-color); }
+    .fake .confidence-bar-fill { background: var(--fake-color); }
+    
+    .detail-text { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; }
+    
+    .reset-btn {
+      background: var(--primary); color: white; border: none; padding: 0.75rem 2rem;
+      font-size: 1rem; font-weight: 600; border-radius: 8px; cursor: pointer;
+      transition: all 0.2s ease; font-family: inherit;
+    }
+    .reset-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(109, 40, 217, 0.4); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    function App() {
+      const [dragActive, setDragActive] = useState(false);
+      const [file, setFile] = useState(null);
+      const [previewUri, setPreviewUri] = useState(null);
+      const [loading, setLoading] = useState(false);
+      const [result, setResult] = useState(null);
+      const [error, setError] = useState(null);
+      const inputRef = useRef(null);
+
+      useEffect(() => {
+        lucide.createIcons();
+      });
+
+      const handleDrag = (e) => {
+        e.preventDefault(); e.stopPropagation();
+        if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+        else if (e.type === "dragleave") setDragActive(false);
+      };
+
+      const processFile = async (selectedFile) => {
+        if (!selectedFile) return;
+        
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/avi', 'video/quicktime'];
+        if (!validTypes.includes(selectedFile.type) && !selectedFile.name.match(/\.(mkv|webm)$/i)) {
+          setError("Unsupported file format. Please upload JPG, PNG, MP4, etc.");
+          return;
+        }
+
+        setFile(selectedFile);
+        setError(null);
+        setPreviewUri(URL.createObjectURL(selectedFile));
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+          const response = await fetch('http://localhost:8000/detect', { method: 'POST', body: formData });
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.detail || "Server error occurred");
+          }
+          const data = await response.json();
+          setResult(data);
+        } catch (err) {
+          setError(err.message || "Failed to connect to backend api.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const handleDrop = (e) => {
+        e.preventDefault(); e.stopPropagation(); setDragActive(false);
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);
+      };
+
+      const handleChange = (e) => {
+        e.preventDefault();
+        if (e.target.files && e.target.files[0]) processFile(e.target.files[0]);
+      };
+
+      const resetState = () => {
+        setFile(null); setPreviewUri(null); setResult(null); setError(null);
+        if (inputRef.current) inputRef.current.value = "";
+      };
+
+      return (
+        <div className="app-container">
+          <div className="header">
+            <h1>Deepfake Detector</h1>
+            <p>AI-powered spatial interaction network for spotting visual anomalies</p>
+          </div>
+
+          <div className="glass-panel">
+            {!loading && !result && (
+              <div 
+                className={`upload-zone ${dragActive ? 'drag-active' : ''}`}
+                onDragEnter={handleDrag} onDragLeave={handleDrag} onDragOver={handleDrag}
+                onDrop={handleDrop} onClick={() => inputRef.current?.click()}
+              >
+                <i data-lucide="upload-cloud" style={{width: 64, height: 64, color: 'var(--primary)', marginBottom: '1rem'}}></i>
+                <p style={{fontSize: '1.2rem', fontWeight: 500}}>Drag & drop an image or video</p>
+                <p style={{color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem'}}>Supports MP4, AVI, JPG, PNG up to 50MB</p>
+                <input ref={inputRef} type="file" className="file-input" accept="image/*,video/mp4,video/avi" onChange={handleChange} />
+              </div>
+            )}
+
+            {loading && (
+              <div className="loader-container">
+                <div className="spinner"></div>
+                <p className="pulsing-text">Analyzing media artifacts...</p>
+                {file && file.type.includes('video') && <p className="detail-text">Videos take slightly longer as frames are extracted</p>}
+              </div>
+            )}
+
+            {error && !loading && (
+               <div className="verdict-box fake" style={{marginTop: '1rem'}}>
+                 <h3 style={{color: 'var(--fake-color)'}}>Error</h3>
+                 <p className="detail-text">{error}</p>
+                 <button className="reset-btn" style={{marginTop: '1rem'}} onClick={resetState}>Try Again</button>
+               </div>
+            )}
+
+            {result && !loading && (
+              <div className="results-view">
+                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
+                  <div className="preview-container" style={{ margin: 0 }}>
+                    {file?.type.includes('video') ? (
+                      <video src={previewUri} className="preview-media" controls autoPlay loop muted></video>
+                    ) : (
+                      <img src={previewUri} alt="Preview" className="preview-media" />
+                    )}
+                  </div>
+                  {result.heatmap_overlay_base64 && (
+                    <div className="preview-container" style={{ margin: 0 }}>
+                      <img src={`data:image/png;base64,${result.heatmap_overlay_base64}`} alt="Grad-CAM Heatmap" className="preview-media" />
+                    </div>
+                  )}
+                </div>
+
+                <div className={`verdict-box ${result.label.toLowerCase()}`}>
+                  <div className="verdict-label">{result.label}</div>
+                  <p className="detail-text">File: {result.filename}</p>
+                  <div className="confidence-bar-bg">
+                    <div className="confidence-bar-fill" style={{ width: `${(result.confidence * 100).toFixed(1)}%` }}></div>
+                  </div>
+                  <p className="detail-text" style={{marginTop: '0.5rem', fontWeight: 500}}>Confidence: {(result.confidence * 100).toFixed(2)}%</p>
+                  <p className="detail-text">(Model raw fake probability: {result.fake_prob.toFixed(4)})</p>
+                </div>
+                <button className="reset-btn" onClick={resetState}>Analyze Another Object</button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
