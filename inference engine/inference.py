@@ -91,7 +91,10 @@ def _transform(image_size: int = 380) -> transforms.Compose:
     cfg  = Config
     mean = getattr(cfg, "IMG_MEAN", [0.485, 0.456, 0.406])
     std  = getattr(cfg, "IMG_STD",  [0.229, 0.224, 0.225])
+    crop_size = int(image_size * 0.78)  # 296 for 380px — matches training
     return transforms.Compose([
+        transforms.Resize((image_size, image_size)),
+        transforms.CenterCrop(crop_size),
         transforms.Resize((image_size, image_size)),
         transforms.ToTensor(),
         transforms.Normalize(mean=mean, std=std),

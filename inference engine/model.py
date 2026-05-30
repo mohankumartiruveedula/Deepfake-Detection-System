@@ -86,6 +86,11 @@ class EfficientNetB4Detector(nn.Module):
 
         if use_srm:
             self.srm_layer = SRMConv2d(in_channels=3)
+            # ImageNet normalization constants — used to un-normalize before SRM
+            self.register_buffer("_img_mean",
+                                 torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1))
+            self.register_buffer("_img_std",
+                                 torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1))
 
         # ── Backbone ────────────────────────────────────────────────────────
         # global_pool='' keeps the spatial (H×W) feature map alive so that
@@ -154,7 +159,10 @@ class EfficientNetB4Detector(nn.Module):
 
     def forward(self, x):
         if self.use_srm:
-            srm_x = self.srm_layer(x)
+            # Un-normalize to [0, 1] so the Laplacian filter sees real pixel
+            # intensities where AI upsampling artifacts are actually visible.
+            raw_x = x * self._img_std + self._img_mean   # [0, 1] range
+            srm_x = self.srm_layer(raw_x)
             x = torch.cat([x, srm_x], dim=1)
             
         # (B, 1792, H', W') — spatial feature map
