@@ -303,12 +303,38 @@ async def detect(file: UploadFile = File(...)):
 @app.get("/health")
 async def health():
     """Simple health check endpoint."""
+    versions = {}
+    
+    try:
+        import numpy as np
+        versions["numpy"] = np.__version__
+    except Exception as e:
+        versions["numpy"] = f"error: {e}"
+        
+    try:
+        versions["torch"] = torch.__version__
+    except Exception as e:
+        versions["torch"] = f"error: {e}"
+        
+    try:
+        import torchvision
+        versions["torchvision"] = torchvision.__version__
+    except Exception as e:
+        versions["torchvision"] = f"error: {e}"
+        
+    try:
+        import mediapipe as mp
+        versions["mediapipe"] = mp.__version__
+    except Exception as e:
+        versions["mediapipe"] = f"error: {e}"
+
     return {
         "status": "ok",
         "model_loaded": _model is not None,
         "device": _device or "not initialised",
         "checkpoint": CHECKPOINT_PATH,
         "gradcam_available": HAS_GRADCAM,
+        "versions": versions,
     }
 
 

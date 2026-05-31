@@ -51,6 +51,7 @@ RUN pip install --no-cache-dir \
     "matplotlib>=3.7.0" \
     "seaborn>=0.12.0" \
     "tqdm>=4.65.0" \
+    "numpy>=1.24.0,<2.0.0" \
     "mediapipe>=0.10.9"
 
 # ── Expose HF Spaces port ─────────────────────────────────────
