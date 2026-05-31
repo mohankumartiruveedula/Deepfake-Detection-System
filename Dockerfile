@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libgl1 \
     libgomp1 \
+    libgcc-s1 \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Working directory ─────────────────────────────────────────
@@ -26,14 +27,18 @@ COPY ["inference engine/", "./inference engine/"]
 # ── Copy backend server ───────────────────────────────────────
 COPY backend/ ./backend/
 
-# ── Install Python dependencies ───────────────────────────────
-# Install CPU-only PyTorch first (saves ~800 MB vs CUDA build)
+# ── Step 1: Pin numpy FIRST before anything else ─────────────
+# mediapipe requires numpy<2.0, pin it early to avoid conflicts
+RUN pip install --no-cache-dir "numpy>=1.24.0,<2.0.0"
+
+# ── Step 2: CPU-only PyTorch ──────────────────────────────────
+# Saves ~800 MB vs CUDA build
 RUN pip install --no-cache-dir \
     torch==2.1.0+cpu \
     torchvision==0.16.0+cpu \
     --index-url https://download.pytorch.org/whl/cpu
 
-# Install the rest of the backend requirements
+# ── Step 3: All other dependencies ───────────────────────────
 RUN pip install --no-cache-dir \
     fastapi>=0.104.0 \
     "uvicorn[standard]>=0.24.0" \
@@ -41,8 +46,11 @@ RUN pip install --no-cache-dir \
     timm>=0.9.12 \
     grad-cam>=1.4.8 \
     "opencv-python-headless>=4.8.0" \
-    Pillow>=10.0.0 \
-    "numpy>=1.24.0" \
+    "Pillow>=10.0.0" \
+    "scikit-learn>=1.3.0" \
+    "matplotlib>=3.7.0" \
+    "seaborn>=0.12.0" \
+    "tqdm>=4.65.0" \
     "mediapipe>=0.10.9"
 
 # ── Expose HF Spaces port ─────────────────────────────────────
