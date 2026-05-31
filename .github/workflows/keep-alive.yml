@@ -1,0 +1,29 @@
+name: Keep HF Space Alive
+
+# Pings the Hugging Face Space health endpoint every 25 minutes
+# to prevent it from going to sleep (free tier sleeps after 48h inactivity).
+# GitHub Actions cron runs every 25 minutes — completely free.
+
+on:
+  schedule:
+    - cron: '*/25 * * * *'   # every 25 minutes, 24/7
+  workflow_dispatch:           # allow manual trigger from GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Ping HF Space health endpoint
+        run: |
+          echo "Pinging https://mohan815-deepfake-detector.hf.space/health ..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 30 \
+            https://mohan815-deepfake-detector.hf.space/health)
+          echo "HTTP Status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "✅ Space is awake and healthy."
+          else
+            echo "⚠️ Space returned HTTP $STATUS — it may be waking up."
+          fi

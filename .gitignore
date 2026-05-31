@@ -1,0 +1,84 @@
+# ─────────────────────────────────────────────────────────────
+#  Deepfake Detection System — .gitignore
+# ─────────────────────────────────────────────────────────────
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ─────────────────────────────────────────────────────────────
+# Project-specific — large data / training artefacts
+# ─────────────────────────────────────────────────────────────
+
+# Training datasets (too large for git — download separately)
+inference engine/datasets/
+inference engine/DF40_train/
+inference engine/ff_real/
+
+# Checkpoints — tracked via Git LFS (see .gitattributes)
+# (keeping the folder, but ignoring non-best checkpoints)
+inference engine/outputs/checkpoints/latest_model.pth
+inference engine/outputs/checkpoints/phase*.pth
+
+# Evaluation plots & temporary outputs
+inference engine/outputs/evaluation/
+inference engine/outputs/logs/
+
+# Large state files generated during data preparation
+inference engine/prepare_state.json
+
+# Scratch / debug scripts
+inference engine/diagnose.py
+inference engine/diagnose_large.py
+inference engine/inject_fake_data.py
+inference engine/phase*.txt
+inference engine/phase*.md
+inference engine/progress_tracker.md
+inference engine/claude_code
+
+# Temporary / build files
+inference engine/*.pptx
+inference engine/*.zip
+inference engine/*.new
+inference engine/train_cmd.txt
+
+# ─────────────────────────────────────────────────────────────
+# Node / Frontend
+# ─────────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# ─────────────────────────────────────────────────────────────
+# OS
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────────────────────
+# IDE / Editor
+# ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo

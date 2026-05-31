@@ -1,3 +1,13 @@
+---
+title: Deepfake Detector
+emoji: 🔍
+colorFrom: green
+colorTo: cyan
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 <p align="center">
   <h1 align="center">🛡️ Deepfake Detection System</h1>
   <p align="center">

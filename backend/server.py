@@ -86,12 +86,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow the Vite dev server and common local dev ports
+# CORS — allow local dev servers and production Vercel frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000",
+        "https://deepfake-detector-mohan815.vercel.app",
+        "https://mohan815-deepfake-detector.hf.space",
+        # Wildcard for any Vercel preview deployments
+        "https://*.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -330,12 +334,14 @@ if __name__ == "__main__":
     print('    curl -X POST http://localhost:8000/detect \\')
     print('         -F "file=@photo.jpg"')
     print()
-    print("  Starting server on http://0.0.0.0:8000 ...")
+    # Port: HF Spaces requires 7860. Override locally with PORT=8000.
+    port = int(os.environ.get("PORT", 7860))
+    print(f"  Starting server on http://0.0.0.0:{port} ...")
     print("=" * 64)
 
     uvicorn.run(
         "server:app",
         host="0.0.0.0",
-        port=8000,
+        port=port,
         reload=False,
     )
