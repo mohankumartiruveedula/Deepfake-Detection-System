@@ -86,14 +86,16 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow local dev servers and production Vercel frontend
+# CORS — allow local dev servers and production frontends
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://localhost:3000",
-        "https://deepfake-detector-mohan815.vercel.app",
+        "https://lively-sunshine-0b1978.netlify.app",
         "https://mohan815-deepfake-detector.hf.space",
+        # Wildcard for any Netlify preview deployments
+        "https://*.netlify.app",
         # Wildcard for any Vercel preview deployments
         "https://*.vercel.app",
     ],
