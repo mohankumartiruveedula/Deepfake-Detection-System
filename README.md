@@ -1,24 +1,16 @@
----
-title: Deepfake Detector
-emoji: 🔍
-colorFrom: green
-colorTo: cyan
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 <p align="center">
   <h1 align="center">🛡️ Deepfake Detection System</h1>
   <p align="center">
     <strong>High-accuracy deepfake detection powered by EfficientNet-B4 and Spatial Rich Model frequency analysis</strong>
   </p>
   <p align="center">
+    <a href="#-live-demo">Live Demo</a> •
     <a href="#-quick-start">Quick Start</a> •
     <a href="#-architecture">Architecture</a> •
     <a href="#-key-features">Features</a> •
     <a href="#-cli-usage">CLI</a> •
     <a href="#-api-reference">API</a> •
+    <a href="#-deployment">Deployment</a> •
     <a href="#-training">Training</a>
   </p>
 </p>
@@ -29,6 +21,7 @@ pinned: false
   <img src="https://img.shields.io/badge/EfficientNet-B4-00C853?style=for-the-badge&logo=tensorflow&logoColor=white" alt="EfficientNet-B4"/>
   <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License MIT"/>
 </p>
 
@@ -38,6 +31,21 @@ pinned: false
   <img src="https://img.shields.io/badge/Dataset-DF40%20(NeurIPS%202024)-purple?style=flat-square" alt="Dataset"/>
   <img src="https://img.shields.io/badge/Methods-40%20Manipulation%20Types-red?style=flat-square" alt="Methods"/>
 </p>
+
+---
+
+## 🌐 Live Demo
+
+> **Try it now — no installation required!**
+
+| Service | URL | Description |
+|:--|:--|:--|
+| 🎨 **Frontend** | [lively-sunshine-0b1978.netlify.app](https://lively-sunshine-0b1978.netlify.app/) | Cyberpunk-themed React UI — upload images & get instant verdicts |
+| ⚙️ **Backend API** | [mohan815-deepfake-detector.hf.space](https://mohan815-deepfake-detector.hf.space/docs) | FastAPI backend hosted on Hugging Face Spaces (Docker) |
+| 🩺 **Health Check** | [/health](https://mohan815-deepfake-detector.hf.space/health) | Live server status, model info & dependency versions |
+
+> [!NOTE]
+> The backend runs on Hugging Face Spaces (free tier, CPU). The first request after inactivity may take ~30 seconds while the model loads into memory.
 
 ---
 
@@ -157,8 +165,9 @@ Trained on the **DF40 dataset** (NeurIPS 2024) spanning **40 distinct manipulati
 
 ### 🌐 Full-Stack Deployment
 - **FastAPI Backend** — Async REST API with automatic OpenAPI documentation
-- **React + Vite Frontend** — Glassmorphism dark-theme UI with drag-and-drop upload
-- **Standalone HTML** — Zero-dependency single-file interface for instant use
+- **React + Vite Frontend** — Cyberpunk dark-theme UI with drag-and-drop upload
+- **Docker Support** — One-command containerized deployment
+- **Hugging Face Spaces** — Free cloud hosting with automated keep-alive
 - **CLI Interface** — Process images, folders, and videos from the command line
 
 </td>
@@ -178,7 +187,7 @@ Trained on the **DF40 dataset** (NeurIPS 2024) spanning **40 distinct manipulati
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Deepfake-Detection-System.git
+git clone https://github.com/mohankumartiruveedula/Deepfake-Detection-System.git
 cd Deepfake-Detection-System
 ```
 
@@ -206,7 +215,10 @@ pip install -r requirements.txt
 python server.py
 ```
 
-The API server will launch at `http://localhost:8000`. You can verify it's running by visiting `http://localhost:8000/docs` for the interactive Swagger UI.
+The API server will launch at `http://localhost:7860`. You can verify it's running by visiting `http://localhost:7860/docs` for the interactive Swagger UI.
+
+> [!TIP]
+> Set the `PORT` environment variable to change the port: `PORT=8000 python server.py`
 
 ### 5. Launch the Frontend
 
@@ -267,20 +279,24 @@ python inference.py --source folder/
 
 # Video analysis (sample every 4th frame)
 python inference.py --source video.mp4 --sample-every 4
+
+# Disable uncertainty zone (force REAL/FAKE only)
+python inference.py --source face.jpg --no-rejection
+
+# Custom threshold
+python inference.py --source face.jpg --threshold 0.45
+
+# Export results to CSV
+python inference.py --source folder/ --output results.csv
 ```
 
 **Example Output:**
 
 ```
-─────────────────────────────────────────
-  Deepfake Detection Result
-─────────────────────────────────────────
-  File:        face.jpg
-  Prediction:  FAKE
-  Confidence:  94.2%
-  Real prob:   0.058
-  Fake prob:   0.942
-─────────────────────────────────────────
+==================================================
+  face.jpg
+  VERDICT: FAKE  conf=0.9425  fake_prob=0.9425
+==================================================
 ```
 
 ---
@@ -289,7 +305,7 @@ python inference.py --source video.mp4 --sample-every 4
 
 ### `POST /detect`
 
-Analyze an uploaded image for deepfake manipulation.
+Analyze an uploaded image or video for deepfake manipulation.
 
 **Request**
 
@@ -299,12 +315,12 @@ Content-Type: multipart/form-data
 
 | Parameter | Type | Description |
 |:--|:--|:--|
-| `file` | `UploadFile` | Image file (JPEG, PNG, WebP) |
+| `file` | `UploadFile` | Image (JPEG, PNG, WebP, BMP, TIFF) or video (MP4, AVI, MOV, MKV, WEBM) |
 
 **cURL Example**
 
 ```bash
-curl -X POST http://localhost:8000/detect \
+curl -X POST https://mohan815-deepfake-detector.hf.space/detect \
   -F "file=@photo.jpg"
 ```
 
@@ -312,21 +328,97 @@ curl -X POST http://localhost:8000/detect \
 
 ```json
 {
-  "prediction": "FAKE",
-  "confidence": 0.942,
-  "real_probability": 0.058,
-  "fake_probability": 0.942,
-  "gradcam": "data:image/png;base64,iVBORw0KGgo..."
+  "label": "FAKE",
+  "confidence": 0.999557,
+  "fake_prob": 0.999557,
+  "filename": "photo.jpg",
+  "heatmap_overlay_base64": "iVBORw0KGgo..."
 }
 ```
 
 | Field | Type | Description |
 |:--|:--|:--|
-| `prediction` | `string` | `REAL`, `FAKE`, or `UNCERTAIN` |
-| `confidence` | `float` | Confidence of the predicted class (0–1) |
-| `real_probability` | `float` | Probability of the image being real |
-| `fake_probability` | `float` | Probability of the image being fake |
-| `gradcam` | `string` | Base64-encoded Grad-CAM heatmap overlay |
+| `label` | `string` | `REAL`, `FAKE`, or `UNCERTAIN` |
+| `confidence` | `float` | Confidence in the predicted label (0–1) |
+| `fake_prob` | `float` | Raw probability of the image being fake (0–1) |
+| `filename` | `string` | Original uploaded filename |
+| `heatmap_overlay_base64` | `string \| null` | Base64-encoded Grad-CAM heatmap PNG (images only) |
+
+### `GET /health`
+
+Check server status, model load state, and dependency versions.
+
+```bash
+curl https://mohan815-deepfake-detector.hf.space/health
+```
+
+```json
+{
+  "status": "ok",
+  "model_loaded": true,
+  "device": "cpu",
+  "checkpoint": "/app/inference engine/outputs/checkpoints/best_model.pth",
+  "gradcam_available": true,
+  "versions": {
+    "numpy": "1.26.4",
+    "torch": "2.1.0+cpu",
+    "torchvision": "0.16.0+cpu",
+    "mediapipe": "0.10.35"
+  }
+}
+```
+
+---
+
+## 🐳 Deployment
+
+The system is deployed as a **Dockerized backend** on Hugging Face Spaces with a **static frontend** on Netlify.
+
+### Architecture Overview
+
+```
+┌─────────────────────┐         ┌─────────────────────────────────┐
+│   Netlify (CDN)     │  POST   │   Hugging Face Spaces (Docker)  │
+│                     │ ──────► │                                 │
+│   React + Vite      │ /detect │   FastAPI + PyTorch (CPU)       │
+│   Static Frontend   │ ◄────── │   EfficientNet-B4 Model         │
+│                     │  JSON   │   Grad-CAM Heatmaps             │
+└─────────────────────┘         └─────────────────────────────────┘
+```
+
+### Deploy Your Own
+
+#### Backend (Hugging Face Spaces)
+
+1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space) with **SDK: Docker**
+2. Clone the Space repo and copy all project files into it
+3. Use Git LFS for the model checkpoint (`*.pth` files):
+   ```bash
+   git lfs install
+   git lfs track "*.pth"
+   ```
+4. Push to the Space — it will auto-build the Docker image and deploy
+
+#### Frontend (Netlify / Vercel)
+
+1. Connect your GitHub repo to Netlify or Vercel
+2. Set **Base directory** to `frontend`
+3. Set **Build command** to `npm run build`
+4. Set **Publish directory** to `frontend/dist`
+5. Add environment variable:
+   ```
+   VITE_API_URL = https://YOUR-USERNAME-YOUR-SPACE.hf.space
+   ```
+
+#### Local Docker
+
+```bash
+docker build -t deepfake-detector .
+docker run -p 7860:7860 deepfake-detector
+```
+
+> [!NOTE]
+> The Docker image uses CPU-only PyTorch (~1.2 GB vs ~4 GB for CUDA) to keep the image size manageable for free-tier hosting.
 
 ---
 
@@ -363,16 +455,27 @@ python train.py
 ```
 Deepfake-Detection-System/
 │
+├── Dockerfile                       # HF Spaces Docker config (CPU PyTorch)
+├── .gitignore                       # Comprehensive ignore rules
+├── .github/
+│   └── workflows/
+│       └── keep-alive.yml           # Cron job to prevent HF Space sleeping
+│
 ├── frontend/                        # React + Vite web interface
 │   ├── src/
-│   │   ├── App.jsx                  # Main React component
-│   │   └── index.css                # Glassmorphism dark theme
+│   │   ├── App.jsx                  # Main React component (cyberpunk UI)
+│   │   ├── index.css                # Dark-theme stylesheet
+│   │   └── main.jsx                 # Vite entry point
+│   ├── index.html                   # HTML template
 │   ├── standalone.html              # Zero-dependency HTML version
+│   ├── vite.config.js               # Vite configuration
+│   ├── vercel.json                  # Vercel SPA routing
+│   ├── .env.production              # Production API URL
 │   └── package.json                 # Node.js dependencies
 │
 ├── backend/                         # FastAPI inference server
-│   ├── server.py                    # REST API endpoint (/detect)
-│   └── requirements.txt            # Python dependencies
+│   ├── server.py                    # REST API (/detect, /health)
+│   └── requirements.txt             # Python dependencies
 │
 ├── inference engine/                # Core ML pipeline
 │   ├── model.py                     # EfficientNet-B4 + SRM architecture
@@ -381,9 +484,13 @@ Deepfake-Detection-System/
 │   ├── train.py                     # Training script
 │   ├── dataset.py                   # Data loading & augmentation
 │   ├── evaluate.py                  # Metrics & evaluation plots
+│   ├── plot_history.py              # Training history visualization
+│   ├── mediapipe_face_model.tflite  # BlazeFace model for face detection
+│   ├── requirements.txt             # ML dependencies
+│   ├── sample photos/               # Test images (real & fake)
 │   └── outputs/
 │       └── checkpoints/
-│           └── best_model.pth       # Trained model weights
+│           └── best_model.pth       # Trained model weights (~214 MB)
 │
 ├── DOCUMENTATION.md                 # Full technical documentation
 └── README.md                        # ← You are here
@@ -433,6 +540,16 @@ Deepfake-Detection-System/
 <td>🎨 Frontend</td>
 <td>React 18 + Vite</td>
 <td>Modern web interface</td>
+</tr>
+<tr>
+<td>🐳 Container</td>
+<td>Docker</td>
+<td>Reproducible deployment</td>
+</tr>
+<tr>
+<td>☁️ Hosting</td>
+<td>HF Spaces + Netlify</td>
+<td>Free-tier cloud deployment</td>
 </tr>
 <tr>
 <td>📦 Dataset</td>
