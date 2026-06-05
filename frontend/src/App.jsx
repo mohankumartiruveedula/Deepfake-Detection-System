@@ -110,10 +110,15 @@ function App() {
 
       {/* ── HEADER ───────────────────────────────────────────── */}
       <div className="header">
+
+        {/* Status bar */}
         <div className="header-status-bar">
           <div className="status-dot" />
           <span>SYSTEM ONLINE</span>
-          <span style={{ color: 'var(--accent)', textShadow: '0 0 6px rgba(0,255,136,0.5)' }}>MODEL: EFFICIENTNET-B4</span>
+          <span>·</span>
+          <span>MODEL: EFFICIENTNET-B4</span>
+          <span>·</span>
+          <span>AUC 0.957</span>
           <div className="status-dot" />
         </div>
 
@@ -121,34 +126,46 @@ function App() {
 
         <div className="header-subtitle">
           <span className="header-badge">DF40 Dataset</span>
-          <span style={{ color: 'var(--border)' }}>|</span>
           <span className="header-badge">Grad-CAM Heatmaps</span>
-          <span style={{ color: 'var(--border)' }}>|</span>
           <span className="header-badge">40 Manipulation Methods</span>
         </div>
 
-        {/* ── Scope Warning Caption ── */}
+        {/* Scope warning */}
         <div className="scope-warning">
           <span className="scope-warning-icon">⚠</span>
-          <span>DESIGNED FOR PORTRAIT HUMAN FACE DEEPFAKES ONLY — FULL-BODY, OBJECT, OR NON-FACE IMAGES MAY YIELD INACCURATE RESULTS</span>
+          <span>
+            DESIGNED FOR PORTRAIT HUMAN FACE DEEPFAKES ONLY —
+            FULL-BODY, OBJECT, OR NON-FACE IMAGES MAY YIELD INACCURATE RESULTS
+          </span>
         </div>
+
       </div>
 
-      {/* ── MAIN PANEL ───────────────────────────────────────── */}
+      {/* ── MAIN PANEL — Industrial "Bolted Module" ───────────── */}
       <div className="cyber-panel">
 
-        {/* Terminal title bar */}
+        {/* Panel title bar with LED dots + vent slots */}
         <div className="panel-header">
           <div className="panel-dot red" />
           <div className="panel-dot yellow" />
           <div className="panel-dot green" />
-          <span style={{ marginLeft: '0.5rem' }}>terminal@deepfake-detector:~$</span>
-          <span className="panel-title"><Cpu size={12} strokeWidth={1.5} style={{ display: 'inline', marginRight: '4px' }} />INFERENCE ENGINE v2.0</span>
+          <span style={{ marginLeft: '0.5rem', fontSize: '0.65rem', fontFamily: 'var(--font-mono)', color: 'var(--fg-muted)', letterSpacing: '0.04em' }}>
+            terminal@deepfake-detector:~$
+          </span>
+          <span className="panel-title">
+            <Cpu size={11} strokeWidth={1.5} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+            INFERENCE ENGINE v2.0
+          </span>
+          <div className="vent-slots">
+            <div className="vent-slot" />
+            <div className="vent-slot" />
+            <div className="vent-slot" />
+          </div>
         </div>
 
         <div className="panel-body">
 
-          {/* ── UPLOAD ZONE ────────────────────────────────── */}
+          {/* ── UPLOAD ZONE ──────────────────────────────────── */}
           {!loading && !result && !error && (
             <div
               id="upload-zone"
@@ -163,19 +180,16 @@ function App() {
               aria-label="Upload image or video for deepfake detection"
               onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
             >
-              {/* Corner markers */}
-              <div className="upload-zone-corner tl" />
-              <div className="upload-zone-corner tr" />
-              <div className="upload-zone-corner bl" />
-              <div className="upload-zone-corner br" />
-
+              {/* Circular icon housing */}
               <div className="upload-icon-wrap">
                 <UploadCloud className="upload-icon" />
               </div>
 
               <p className="upload-text">DROP FILE TO ANALYZE</p>
               <p className="upload-subtext">JPG · PNG · WEBP · MP4 · AVI · MKV · WEBM &nbsp;·&nbsp; MAX 50 MB</p>
-              <p className="upload-prompt">CLICK OR DRAG A FILE HERE<span className="cursor" /></p>
+              <p className="upload-prompt">
+                CLICK OR DRAG A FILE HERE<span className="cursor" />
+              </p>
 
               <input
                 ref={inputRef}
@@ -188,9 +202,11 @@ function App() {
             </div>
           )}
 
-          {/* ── LOADING STATE ───────────────────────────────── */}
+          {/* ── LOADING STATE ─────────────────────────────────── */}
           {loading && (
             <div className="loader-container" id="loader">
+
+              {/* Industrial 3-ring spinner */}
               <div className="cyber-spinner">
                 <div className="cyber-spinner-ring" />
                 <div className="cyber-spinner-ring" />
@@ -198,6 +214,7 @@ function App() {
                 <div className="cyber-spinner-core" />
               </div>
 
+              {/* Progress track */}
               <div className="scan-progress-track">
                 <div className="scan-progress-fill" />
               </div>
@@ -205,32 +222,37 @@ function App() {
               <p className="pulsing-text">{scanLine}</p>
 
               <div className="scan-log">
-                <span>// LOADING CHECKPOINT: best_model.pth</span>
+                <span>// CHECKPOINT: best_model.pth</span>
                 <span>// FACE DETECTOR: MEDIAPIPE BLAZEFACE</span>
                 {file?.type.includes('video') && (
                   <span>// VIDEO MODE: SAMPLING EVERY 8TH FRAME</span>
                 )}
               </div>
+
             </div>
           )}
 
-          {/* ── ERROR STATE ─────────────────────────────────── */}
+          {/* ── ERROR STATE ───────────────────────────────────── */}
           {error && !loading && (
             <div className="error-box" id="error-box">
-              <h3><AlertTriangle size={14} strokeWidth={1.5} style={{ display: 'inline', marginRight: '6px' }} />ERROR</h3>
-              <p className="detail-text" style={{ marginTop: '0.5rem' }}>{error}</p>
+              <h3>
+                <AlertTriangle size={13} strokeWidth={1.5} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle' }} />
+                ERROR
+              </h3>
+              <p className="detail-text" style={{ marginTop: '0.75rem' }}>{error}</p>
               <button
                 className="reset-btn"
                 id="try-again-btn"
                 style={{ marginTop: '1.25rem' }}
                 onClick={resetState}
               >
+                <RotateCcw size={13} strokeWidth={1.5} />
                 <span>RETRY</span>
               </button>
             </div>
           )}
 
-          {/* ── RESULTS VIEW ────────────────────────────────── */}
+          {/* ── RESULTS VIEW ──────────────────────────────────── */}
           {result && !loading && (
             <div className="results-view" id="results-view">
 
@@ -257,8 +279,9 @@ function App() {
                 )}
               </div>
 
-              {/* ── VERDICT CARD ──────────────────────────── */}
+              {/* ── VERDICT CARD ───────────────────────────── */}
               <div className={`verdict-box ${verdictClass}`} id="verdict-box">
+
                 <div className="verdict-label" id="verdict-label">
                   {verdictIcon[verdictClass]}
                   &nbsp;{result.label}
@@ -290,11 +313,12 @@ function App() {
                     ⚠ LOW CONFIDENCE (P=0.35–0.50). HUMAN REVIEW RECOMMENDED.
                   </p>
                 )}
+
               </div>
 
               {/* Reset button */}
               <button className="reset-btn" id="reset-btn" onClick={resetState}>
-                <RotateCcw size={14} strokeWidth={1.5} />
+                <RotateCcw size={13} strokeWidth={1.5} />
                 <span>ANALYZE ANOTHER FILE</span>
               </button>
 
@@ -303,7 +327,7 @@ function App() {
 
         </div>{/* /panel-body */}
 
-        {/* ── PANEL FOOTER ─────────────────────────────────── */}
+        {/* ── PANEL FOOTER — Data strip ─────────────────────── */}
         <div className="panel-footer">
           <div className="footer-stat">
             <span>STATUS:</span>
@@ -311,11 +335,11 @@ function App() {
           </div>
           <div className="footer-stat">
             <span>BACKEND:</span>
-            <span className="footer-accent">localhost:8000</span>
+            <span className="footer-accent">HF SPACES</span>
           </div>
           <div className="footer-stat">
             <span>MODEL:</span>
-            <span className="footer-accent">AUC 0.9391</span>
+            <span className="footer-accent">AUC 0.957</span>
           </div>
           <div className="footer-stat">
             <span>DATASET:</span>
